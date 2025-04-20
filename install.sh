@@ -26,9 +26,9 @@ apt install libtinyxml2-dev
 ubuntu_version=$(lsb_release -rs)
 ubuntu_version_flag=20
 case $ubuntu_version in
-    22.*) ubuntu_version_flag=22 ;;
-    20.*) ubuntu_version_flag=20 ;;
-    18.*) ubuntu_version_flag=18 ;;
+    22*) ubuntu_version_flag=22 ;;
+    20*) ubuntu_version_flag=20 ;;
+    18*) ubuntu_version_flag=18 ;;
     *) ubuntu_version_flag=0 ;;
 esac
 

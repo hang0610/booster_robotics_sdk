@@ -73,6 +73,44 @@ private:
     const std::string channel_name_ = kTopicLowState;
 };
 
+class __attribute__((visibility("hidden"))) B1LowCmdSubscriber : public std::enable_shared_from_this<B1LowCmdSubscriber> {
+public:
+    B1LowCmdSubscriber(const py::function &py_handler) :
+        py_handler_(py_handler) {
+    }
+
+    void InitChannel() {
+        py::gil_scoped_release release;
+        auto weak_this = std::weak_ptr<B1LowCmdSubscriber>(shared_from_this());
+        channel_ptr_ = booster::robot::ChannelFactory::Instance()->CreateRecvChannel<LowCmd>(channel_name_, [weak_this](const void *msg) {
+            if (auto shared_this = weak_this.lock()) {
+                {
+                    py::gil_scoped_acquire acquire;
+                    const LowCmd *low_cmd_msg = static_cast<const LowCmd *>(msg);
+                    shared_this->py_handler_(low_cmd_msg);
+                }
+            }
+        });
+    }
+
+    void CloseChannel() {
+        py::gil_scoped_release release;
+        if (channel_ptr_) {
+            booster::robot::ChannelFactory::Instance()->CloseReader(channel_name_);
+            channel_ptr_.reset();
+        }
+    }
+
+    const std::string &GetChannelName() const {
+        return channel_name_;
+    }
+
+private:
+    ChannelPtr<booster_interface::msg::LowCmd> channel_ptr_;
+    py::function py_handler_;
+    const std::string channel_name_ = kTopicJointCtrl;
+};
+
 class __attribute__((visibility("hidden"))) B1LowHandDataScriber : public std::enable_shared_from_this<B1LowHandDataScriber> {
 public:
     B1LowHandDataScriber(const py::function &py_handler) :
@@ -143,6 +181,40 @@ public:
 private:
     std::string channel_name_;
     ChannelPtr<LowCmd> channel_ptr_;
+};
+
+class __attribute__((visibility("hidden"))) B1LowStatePublisher {
+public:
+    explicit B1LowStatePublisher() : channel_name_(kTopicLowState) {
+    }
+
+    void InitChannel() {
+        py::gil_scoped_release release;
+        channel_ptr_ = ChannelFactory::Instance()->CreateSendChannel<LowState>(channel_name_);
+    }
+
+    bool Write(LowState *msg) {
+        if (channel_ptr_) {
+            return channel_ptr_->Write(msg);
+        }
+        return false;
+    }
+
+    void CloseChannel() {
+        py::gil_scoped_release release;
+        if (channel_ptr_) {
+            ChannelFactory::Instance()->CloseWriter(channel_name_);
+            channel_ptr_.reset();
+        }
+    }
+
+    const std::string &GetChannelName() const {
+        return channel_name_;
+    }
+
+private:
+    std::string channel_name_;
+    ChannelPtr<LowState> channel_ptr_;
 };
 
 class __attribute__((visibility("hidden"))) B1OdometerStateSubscriber : public std::enable_shared_from_this<B1OdometerStateSubscriber> {
@@ -627,6 +699,18 @@ PYBIND11_MODULE(booster_robotics_sdk_python, m) {
         .def("CloseChannel", &robot::b1::B1LowStateSubscriber::CloseChannel, "Close low state subscription channel")
         .def("GetChannelName", &robot::b1::B1LowStateSubscriber::GetChannelName, "Get low state subscription channel name");
 
+    py::class_<robot::b1::B1LowCmdSubscriber, std::shared_ptr<robot::b1::B1LowCmdSubscriber>>(m, "B1LowCmdSubscriber")
+        .def(py::init<const py::function &>(), py::arg("handler"), R"pbdoc(
+                 /**
+                 * @brief init low cmd subscriber with callback handler
+                 *
+                 * @param handler callback handler of low cmd, the handler should accept one parameter of type LowCmd
+                 *
+                 */
+            )pbdoc")
+        .def("InitChannel", &robot::b1::B1LowCmdSubscriber::InitChannel, "Init low cmd subscription channel")
+        .def("CloseChannel", &robot::b1::B1LowCmdSubscriber::CloseChannel, "Close low cmd subscription channel")
+        .def("GetChannelName", &robot::b1::B1LowCmdSubscriber::GetChannelName, "Get low cmd subscription channel name");
 
     py::class_<robot::b1::B1LowHandDataScriber, std::shared_ptr<robot::b1::B1LowHandDataScriber>>(m, "B1LowHandDataScriber")
         .def(py::init<const py::function &>(), py::arg("handler"), R"pbdoc(
@@ -655,6 +739,20 @@ PYBIND11_MODULE(booster_robotics_sdk_python, m) {
             )pbdoc")
         .def("CloseChannel", &robot::b1::B1LowCmdPublisher::CloseChannel, "Close low cmd publication channel")
         .def("GetChannelName", &robot::b1::B1LowCmdPublisher::GetChannelName, "Get low cmd publication channel name");
+    
+    py::class_<robot::b1::B1LowStatePublisher>(m, "B1LowStatePublisher")
+        .def(py::init<>())
+        .def("InitChannel", &robot::b1::B1LowStatePublisher::InitChannel, "Init low state publication channel")
+        .def("Write", &robot::b1::B1LowStatePublisher::Write, py::arg("msg"), R"pbdoc(
+                 /**
+                 * @brief write low state message into channel, i.e. publish low state message
+                 *
+                 * @param msg LowState
+                 *
+                 */
+            )pbdoc")
+        .def("CloseChannel", &robot::b1::B1LowStatePublisher::CloseChannel, "Close low state publication channel")
+        .def("GetChannelName", &robot::b1::B1LowStatePublisher::GetChannelName, "Get low state publication channel name");
 
     py::class_<Odometer>(m, "Odometer")
         .def(py::init<>())
