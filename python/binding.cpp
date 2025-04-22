@@ -600,27 +600,48 @@ PYBIND11_MODULE(booster_robotics_sdk_python, m) {
     py::class_<MotorState>(m, "MotorState")
         .def(py::init<>())
         .def(py::init<const MotorState &>())
+        // .def_property("mode",
+        //               (uint8_t(MotorState::*)() const) & MotorState::mode,
+        //               (uint8_t & (MotorState::*)()) & MotorState::mode)
+        // .def_property("q",
+        //               (float(MotorState::*)() const) & MotorState::q,
+        //               (float &(MotorState::*)()) & MotorState::q)
+        // .def_property("dq",
+        //               (float(MotorState::*)() const) & MotorState::dq,
+        //               (float &(MotorState::*)()) & MotorState::dq)
+        // .def_property("ddq",
+        //               (float(MotorState::*)() const) & MotorState::ddq,
+        //               (float &(MotorState::*)()) & MotorState::ddq)
+        // .def_property("tau_est",
+        //               (float(MotorState::*)() const) & MotorState::tau_est,
+        //               (float &(MotorState::*)()) & MotorState::tau_est)
+        // .def_property("temperature",
+        //               (uint8_t(MotorState::*)() const) & MotorState::temperature,
+        //               (uint8_t & (MotorState::*)()) & MotorState::temperature)
+        // .def_property("lost",
+        //               (uint32_t(MotorState::*)() const) & MotorState::lost,
+        //               (uint32_t & (MotorState::*)()) & MotorState::lost)
         .def_property("mode",
-                      (uint8_t(MotorState::*)() const) & MotorState::mode,
-                      (uint8_t & (MotorState::*)()) & MotorState::mode)
+                    (uint8_t(MotorState::*)() const) & MotorState::mode,
+                    (void(MotorState::*)(uint8_t)) & MotorState::mode)
         .def_property("q",
-                      (float(MotorState::*)() const) & MotorState::q,
-                      (float &(MotorState::*)()) & MotorState::q)
+                    (float(MotorState::*)() const) & MotorState::q,
+                    (void(MotorState::*)(float)) & MotorState::q)
         .def_property("dq",
-                      (float(MotorState::*)() const) & MotorState::dq,
-                      (float &(MotorState::*)()) & MotorState::dq)
+                    (float(MotorState::*)() const) & MotorState::dq,
+                    (void(MotorState::*)(float)) & MotorState::dq)
         .def_property("ddq",
-                      (float(MotorState::*)() const) & MotorState::ddq,
-                      (float &(MotorState::*)()) & MotorState::ddq)
+                    (float(MotorState::*)() const) & MotorState::ddq,
+                    (void(MotorState::*)(float)) & MotorState::ddq)
         .def_property("tau_est",
-                      (float(MotorState::*)() const) & MotorState::tau_est,
-                      (float &(MotorState::*)()) & MotorState::tau_est)
+                    (float(MotorState::*)() const) & MotorState::tau_est,
+                    (void(MotorState::*)(float)) & MotorState::tau_est)
         .def_property("temperature",
-                      (uint8_t(MotorState::*)() const) & MotorState::temperature,
-                      (uint8_t & (MotorState::*)()) & MotorState::temperature)
+                    (uint8_t(MotorState::*)() const) & MotorState::temperature,
+                    (void(MotorState::*)(uint8_t)) & MotorState::temperature)
         .def_property("lost",
-                      (uint32_t(MotorState::*)() const) & MotorState::lost,
-                      (uint32_t & (MotorState::*)()) & MotorState::lost)
+                    (uint32_t(MotorState::*)() const) & MotorState::lost,
+                    (void(MotorState::*)(uint32_t)) & MotorState::lost)
         .def_property("reserve",
                       (const std::array<uint32_t, 2> &(MotorState::*)() const) & MotorState::reserve,
                       (std::array<uint32_t, 2> & (MotorState::*)()) & MotorState::reserve)
