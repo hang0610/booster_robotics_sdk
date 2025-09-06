@@ -26,13 +26,14 @@ apt install libtinyxml2-dev
 ubuntu_version=$(lsb_release -rs)
 ubuntu_version_flag=20
 case $ubuntu_version in
+    24.*) ubuntu_version_flag=24 ;;
     22.*) ubuntu_version_flag=22 ;;
     20.*) ubuntu_version_flag=20 ;;
     18.*) ubuntu_version_flag=18 ;;
     *) ubuntu_version_flag=0 ;;
 esac
 
-if [ $ubuntu_version_flag -eq 22 ]; then
+if [ $ubuntu_version_flag -eq 24 ] || [ $ubuntu_version_flag -eq 22 ]; then
     booster_sdk_lib_dir=$booster_sdk_dir/lib/$cpu_arch
     third_party_lib_dir=$third_party_dir/lib/$cpu_arch
 else
