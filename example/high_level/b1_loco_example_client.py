@@ -1,4 +1,4 @@
-from booster_robotics_sdk_python import B1LocoClient, ChannelFactory, RobotMode, B1HandIndex, GripperControlMode, Position, Orientation, Posture, GripperMotionParameter, Quaternion, Frame, Transform, DexterousFingerParameter
+from booster_robotics_sdk_python import B1LocoClient, ChannelFactory, RobotMode, B1HandIndex, GripperControlMode, Position, Orientation, Posture, GripperMotionParameter, GetModeResponse, Quaternion, Frame, Transform, DexterousFingerParameter
 import sys, time, random
 
 def hand_rock(client: B1LocoClient):
@@ -333,8 +333,8 @@ def main():
             elif input_cmd == "mhel":
                 tar_posture = Posture()
                 tar_posture.position = Position(0.35, 0.25, 0.1)
-                tar_posture.orientation = Orientation(0.0, 0.0, 0.0)
-                res = client.MoveHandEndEffector(tar_posture, 2000, B1HandIndex.kLeftHand)
+                tar_posture.orientation = Orientation(-1.57, -1.57, 0.0)
+                res = client.MoveHandEndEffectorV2(tar_posture, 2000, B1HandIndex.kLeftHand)
             elif input_cmd == "gopenl":
                 motion_param = GripperMotionParameter()
                 motion_param.position = 500
@@ -349,6 +349,11 @@ def main():
                 res = client.GetFrameTransform(src, dst, transform)
                 if res == 0:
                     print(f"Transform: {transform}")
+            elif input_cmd == "gm":
+                gm: GetModeResponse = GetModeResponse()
+                res = client.GetMode(gm)
+                if res == 0:
+                    print(f"gm: {gm.mode}")
             elif input_cmd == "hcm-start":
                 res = client.SwitchHandEndEffectorControlMode(True)
             elif input_cmd == "hcm-stop":
